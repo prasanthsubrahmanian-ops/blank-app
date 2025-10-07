@@ -1,7 +1,7 @@
 streamlit
 plotly
 pandas
-nsepython
+nsepython==0.1.61
 numpy
 matplotlib
 seaborn
