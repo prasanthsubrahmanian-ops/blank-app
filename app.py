@@ -1,8 +1,8 @@
-# app.py - Prasanth AI Trader Dashboard (Safe & Interactive)
+# app.py - Prasanth AI Trader Dashboard (Safe for Streamlit Cloud)
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from nsepython import get_quote, nse_optionchain_scrapper, nse_expiry_dates
+from nsepython import nse_optionchain_scrapper, nse_expiry_dates
 import yfinance as yf
 
 # -----------------------------
@@ -43,31 +43,24 @@ else:
     expiry = st.sidebar.text_input("Option Expiry (enter manually)", "2025-10-10")
 
 # -----------------------------
-# Live Stock Quote (NSEPython + fallback)
+# Live Stock Quote (yfinance only)
 # -----------------------------
 st.subheader(f"Live Price for {symbol}")
 try:
-    quote = get_quote(symbol)
-    if quote:
-        quote_df = pd.DataFrame([quote]).T
-        quote_df.columns = ["Value"]
-        st.dataframe(quote_df)
+    ticker = yf.Ticker(symbol + ".NS")
+    data = ticker.history(period="1d")
+    if not data.empty:
+        latest = data.tail(1)
+        st.dataframe(latest)
     else:
-        ticker = yf.Ticker(symbol + ".NS")
-        data = ticker.history(period="1d")
-        st.dataframe(data.tail(1))
-except Exception:
-    try:
-        ticker = yf.Ticker(symbol + ".NS")
-        data = ticker.history(period="1d")
-        st.dataframe(data.tail(1))
-    except Exception as e2:
-        st.error(f"Cannot fetch data for {symbol}: {e2}")
+        st.warning("No data available for this stock.")
+except Exception as e:
+    st.error(f"Cannot fetch data for {symbol}: {e}")
 
 # -----------------------------
-# Candlestick Chart
+# Candlestick Chart (1 month)
 # -----------------------------
-st.subheader(f"{symbol} Candlestick Chart (Daily OHLC)")
+st.subheader(f"{symbol} Candlestick Chart (1 Month OHLC)")
 try:
     ticker = yf.Ticker(symbol + ".NS")
     hist = ticker.history(period="1mo")
