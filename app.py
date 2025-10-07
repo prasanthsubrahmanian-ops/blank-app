@@ -1,36 +1,28 @@
-# app.py - Prasanth AI Trader Dashboard (Cloud Safe, No NSEPython)
+# app.py - Prasanth AI Trader (No NSEPython, Cloud Safe)
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import yfinance as yf
 
 # -----------------------------
-# Page Configuration
+# Page setup
 # -----------------------------
-st.set_page_config(
-    page_title="Prasanth AI Trader",
-    page_icon="📈",
-    layout="wide"
-)
+st.set_page_config(page_title="Prasanth AI Trader", page_icon="📈", layout="wide")
 
-# -----------------------------
-# Header
-# -----------------------------
 st.title("📊 Welcome to Prasanth AI Trader")
 st.markdown("#### Real-time NIFTY 50 Stocks Analytics 🚀")
 
 # -----------------------------
-# Sidebar
+# Sidebar: Stock selection
 # -----------------------------
-st.sidebar.header("Select Stock")
 nifty_symbols = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
                  "SBIN", "HINDUNILVR", "LT", "AXISBANK", "ITC"]
 symbol = st.sidebar.selectbox("Select Stock", nifty_symbols)
 
 # -----------------------------
-# Live Stock Quote (via yfinance)
+# Live stock data (yfinance)
 # -----------------------------
-st.subheader(f"Live Price for {symbol}")
+st.subheader(f"📈 Live Price for {symbol}")
 try:
     ticker = yf.Ticker(symbol + ".NS")
     data = ticker.history(period="1d")
@@ -39,10 +31,10 @@ try:
     else:
         st.warning("No data available for this stock.")
 except Exception as e:
-    st.error(f"Cannot fetch data for {symbol}: {e}")
+    st.error(f"Cannot fetch data: {e}")
 
 # -----------------------------
-# Candlestick Chart (1 Month)
+# Candlestick chart
 # -----------------------------
 st.subheader(f"{symbol} Candlestick Chart (1 Month)")
 try:
@@ -65,9 +57,9 @@ try:
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.info("Candlestick data not available.")
+        st.info("No candlestick data available.")
 except Exception as e:
-    st.error(f"Error fetching candlestick chart: {e}")
+    st.error(f"Error fetching chart: {e}")
 
 # -----------------------------
 # Footer
