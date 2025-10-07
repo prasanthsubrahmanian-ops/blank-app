@@ -1,8 +1,9 @@
 # app.py - Prasanth AI Trader Dashboard
 import streamlit as st
-import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
+from nsepython import *
+from datetime import datetime
 
 # -----------------------------
 # Page Configuration
@@ -17,65 +18,83 @@ st.set_page_config(
 # Header
 # -----------------------------
 st.title("📊 Welcome to Prasanth AI Trader")
-st.markdown("#### Real-time NIFTY 50 & Bank NIFTY Stocks & Derivatives Analytics 🚀")
+st.markdown("#### Real-time NIFTY 50 & Bank NIFTY Stocks & Options Analytics 🚀")
 
 # -----------------------------
-# Sidebar for User Inputs
+# Sidebar for Inputs
 # -----------------------------
 st.sidebar.header("Select Options")
-
 index_option = st.sidebar.selectbox("Select Index", ["NIFTY 50", "BANK NIFTY"])
 
 # Example NIFTY 50 stocks
-nifty_symbols = [
-    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS",
-    "ICICIBANK.NS", "SBIN.NS", "HINDUNILVR.NS",
-    "LT.NS", "AXISBANK.NS", "ITC.NS"
-]
-
+nifty_symbols = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
+                 "SBIN", "HINDUNILVR", "LT", "AXISBANK", "ITC"]
 symbol = st.sidebar.selectbox("Select Stock", nifty_symbols)
-period = st.sidebar.selectbox("Period", ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y"])
-interval = st.sidebar.selectbox("Interval", ["5m", "15m", "1h", "1d"])
+
+# Option expiry dates
+expiries = nse_expiry_dates()
+expiry = st.sidebar.selectbox("Option Expiry", expiries)
 
 # -----------------------------
-# Fetch Data
+# Live Stock Quote
 # -----------------------------
-st.info(f"Fetching data for **{symbol}**...")
-
+st.subheader(f"Live Price for {symbol}")
 try:
-    data = yf.download(symbol, period=period, interval=interval)
-    data.reset_index(inplace=True)
+    quote = get_quote(symbol)
+    quote_df = pd.DataFrame([quote]).T
+    quote_df.columns = ["Value"]
+    st.dataframe(quote_df)
+except Exception as e:
+    st.error(f"Error fetching live stock data: {e}")
 
-    # -----------------------------
-    # Plotly Candlestick Chart
-    # -----------------------------
+# -----------------------------
+# Candlestick Chart (Daily OHLC)
+# -----------------------------
+st.subheader(f"{symbol} Candlestick Chart (Daily OHLC)")
+try:
+    # Fetch historical data for last 30 days
+    hist = nse_stock_quote_hist(symbol)
+    hist_df = pd.DataFrame(hist)
+    hist_df['Date'] = pd.to_datetime(hist_df['Date'])
+    hist_df = hist_df.sort_values('Date')
+
     fig = go.Figure(data=[go.Candlestick(
-        x=data['Datetime'] if 'Datetime' in data.columns else data['Date'],
-        open=data['Open'],
-        high=data['High'],
-        low=data['Low'],
-        close=data['Close'],
+        x=hist_df['Date'],
+        open=hist_df['Open'],
+        high=hist_df['High'],
+        low=hist_df['Low'],
+        close=hist_df['Close'],
         name=symbol
     )])
-
     fig.update_layout(
-        title=f"{symbol} Price Chart ({period})",
         xaxis_title="Date",
         yaxis_title="Price (INR)",
         xaxis_rangeslider_visible=False,
         template="plotly_dark"
     )
-
     st.plotly_chart(fig, use_container_width=True)
 
-    # -----------------------------
-    # Display Latest Data
-    # -----------------------------
-    st.subheader("Recent Data")
-    st.dataframe(data.tail(10))
-
 except Exception as e:
-    st.error(f"Error fetching data: {e}")
+    st.error(f"Error fetching OHLC data: {e}")
+
+# -----------------------------
+# NIFTY Option Chain
+# -----------------------------
+if index_option == "NIFTY 50":
+    st.subheader(f"NIFTY Option Chain for Expiry: {expiry}")
+    try:
+        option_chain = nse_optionchain_scrapper('NIFTY', expiry)
+        ce_data = pd.DataFrame(option_chain['CE'])
+        pe_data = pd.DataFrame(option_chain['PE'])
+
+        st.markdown("**Call Options (CE)**")
+        st.dataframe(ce_data.head(20))
+
+        st.markdown("**Put Options (PE)**")
+        st.dataframe(pe_data.head(20))
+
+    except Exception as e:
+        st.error(f"Error fetching NIFTY option chain: {e}")
 
 # -----------------------------
 # Footer
