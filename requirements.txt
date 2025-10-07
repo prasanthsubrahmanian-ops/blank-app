@@ -1,6 +1,7 @@
 streamlit
 plotly
 pandas
+yfinance
 nsepython==0.1.61
 numpy
 matplotlib
