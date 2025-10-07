@@ -1,40 +1,84 @@
+# app.py - AI NIFTY Trade Dashboard
 import streamlit as st
-import pandas as pd
 import yfinance as yf
+import pandas as pd
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="AI Trader", layout="wide")
+# -----------------------------
+# Page Configuration
+# -----------------------------
+st.set_page_config(
+    page_title="AI Trade Dashboard - NIFTY",
+    page_icon="📈",
+    layout="wide"
+)
 
-st.title("📈 AI Trader Dashboard")
-st.write("Welcome to your AI-powered trading insights app!")
+# -----------------------------
+# Header
+# -----------------------------
+st.title("📊 Welcome to the AI Trade Dashboard")
+st.markdown("#### Real-time NIFTY 50 & Bank NIFTY Stocks & Derivatives Analytics 🚀")
 
-# Sidebar input
-symbol = st.sidebar.text_input("Enter Stock Symbol (e.g. AAPL, RELIANCE.NS):", "RELIANCE.NS")
-start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2024-01-01"))
-end_date = st.sidebar.date_input("End Date", pd.to_datetime("today"))
+# -----------------------------
+# Sidebar for User Inputs
+# -----------------------------
+st.sidebar.header("Select Options")
 
-# Fetch data
+index_option = st.sidebar.selectbox("Select Index", ["NIFTY 50", "BANK NIFTY"])
+
+# Example NIFTY 50 stocks (you can expand later)
+nifty_symbols = [
+    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS",
+    "ICICIBANK.NS", "SBIN.NS", "HINDUNILVR.NS",
+    "LT.NS", "AXISBANK.NS", "ITC.NS"
+]
+
+symbol = st.sidebar.selectbox("Select Stock", nifty_symbols)
+period = st.sidebar.selectbox("Period", ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y"])
+interval = st.sidebar.selectbox("Interval", ["5m", "15m", "1h", "1d"])
+
+# -----------------------------
+# Fetch Data
+# -----------------------------
+st.info(f"Fetching data for **{symbol}**...")
+
 try:
-    data = yf.download(symbol, start=start_date, end=end_date)
-    if data.empty:
-        st.warning("No data found for this symbol.")
-    else:
-        st.subheader(f"{symbol} Stock Data")
-        st.dataframe(data.tail())
+    data = yf.download(symbol, period=period, interval=interval)
+    data.reset_index(inplace=True)
 
-        # Chart
-        fig = go.Figure()
-        fig.add_trace(go.Candlestick(
-            x=data.index,
-            open=data['Open'],
-            high=data['High'],
-            low=data['Low'],
-            close=data['Close'],
-            name="Candlestick"
-        ))
-        fig.update_layout(title=f"{symbol} Price Chart", xaxis_rangeslider_visible=False)
-        st.plotly_chart(fig, use_container_width=True)
+    # -----------------------------
+    # Plotly Candlestick Chart
+    # -----------------------------
+    fig = go.Figure(data=[go.Candlestick(
+        x=data['Datetime'] if 'Datetime' in data.columns else data['Date'],
+        open=data['Open'],
+        high=data['High'],
+        low=data['Low'],
+        close=data['Close'],
+        name=symbol
+    )])
+
+    fig.update_layout(
+        title=f"{symbol} Price Chart ({period})",
+        xaxis_title="Date",
+        yaxis_title="Price (INR)",
+        xaxis_rangeslider_visible=False,
+        template="plotly_dark"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # -----------------------------
+    # Display Latest Data
+    # -----------------------------
+    st.subheader("Recent Data")
+    st.dataframe(data.tail(10))
+
 except Exception as e:
-    st.error(f"Error loading data: {e}")
+    st.error(f"Error fetching data: {e}")
 
-st.write("Developed by Prasanth’s AI Trader 🧠💹")
+# -----------------------------
+# Footer
+# -----------------------------
+st.markdown("---")
+st.caption("📈 Developed by Prasanth | AI-Powered NIFTY Trade Dashboard")
