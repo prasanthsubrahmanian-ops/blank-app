@@ -1,48 +1,56 @@
 import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
 import yfinance as yf
+import plotly.graph_objects as go
+import pandas as pd
 
-st.set_page_config(page_title="Prasanth AI Trader", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Prashu AI Trader", layout="wide")
 
-st.title("📊 Welcome to Prasanth AI Trader")
-st.markdown("#### Real-time NIFTY 50 Stocks Analytics 🚀")
+st.title("📊 Prashu – Simple NIFTY Dashboard")
+st.write("Track NIFTY 50 stocks and index charts easily")
 
-# Sidebar: Stock selection
-nifty_symbols = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
-                 "SBIN", "HINDUNILVR", "LT", "AXISBANK", "ITC"]
-symbol = st.sidebar.selectbox("Select Stock", nifty_symbols)
+# --- Stock Selection ---
+stocks = ["RELIANCE", "TCS", "INFY", "ICICIBANK", "HDFCBANK"]
+selected = st.selectbox("Select Stock", stocks)
 
-# Live stock data
-st.subheader(f"📈 Live Price for {symbol}")
-ticker = yf.Ticker(symbol + ".NS")
-data = ticker.history(period="1d")
+# --- Fetch Data ---
+data = yf.download(f"{selected}.NS", period="1mo", interval="1d")
 if data.empty:
-    st.warning("No live data available.")
+    st.warning("No data found. Try another stock.")
 else:
-    st.dataframe(data.tail(1))
+    data.reset_index(inplace=True)
+    st.subheader(f"{selected} - Last 5 Days")
+    st.dataframe(data.tail())
 
-# Candlestick chart (1 Month)
-st.subheader(f"{symbol} Candlestick Chart (1 Month)")
-hist = ticker.history(period="1mo")
-if not hist.empty:
-    hist.reset_index(inplace=True)
     fig = go.Figure(data=[go.Candlestick(
-        x=hist['Date'],
-        open=hist['Open'],
-        high=hist['High'],
-        low=hist['Low'],
-        close=hist['Close']
+        x=data['Date'],
+        open=data['Open'],
+        high=data['High'],
+        low=data['Low'],
+        close=data['Close']
     )])
     fig.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Price (INR)",
+        title=f"{selected} - Candlestick Chart",
         xaxis_rangeslider_visible=False,
         template="plotly_dark"
     )
     st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("No chart data available.")
 
-st.markdown("---")
-st.caption("📈 Developed by Prasanth | Cloud Safe AI Trader Dashboard")
+# --- NIFTY Index ---
+st.subheader("NIFTY 50 Index Chart")
+nifty = yf.download("^NSEI", period="1mo", interval="1d")
+
+if not nifty.empty:
+    nifty.reset_index(inplace=True)
+    fig2 = go.Figure(data=[go.Candlestick(
+        x=nifty['Date'],
+        open=nifty['Open'],
+        high=nifty['High'],
+        low=nifty['Low'],
+        close=nifty['Close']
+    )])
+    fig2.update_layout(
+        title="NIFTY 50 Index",
+        xaxis_rangeslider_visible=False,
+        template="plotly_dark"
+    )
+    st.plotly_chart(fig2, use_container_width=True)
