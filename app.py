@@ -1,4 +1,4 @@
-  import streamlit as st
+import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import yfinance as yf
@@ -8,25 +8,23 @@ st.set_page_config(page_title="Prasanth AI Trader", page_icon="📈", layout="wi
 st.title("📊 Welcome to Prasanth AI Trader")
 st.markdown("#### Real-time NIFTY 50 Stocks Analytics 🚀")
 
-# Sidebar for stock selection
+# Sidebar: Stock selection
 nifty_symbols = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
                  "SBIN", "HINDUNILVR", "LT", "AXISBANK", "ITC"]
 symbol = st.sidebar.selectbox("Select Stock", nifty_symbols)
 
-# Fetch live stock data from Yahoo Finance
+# Live stock data
 st.subheader(f"📈 Live Price for {symbol}")
 ticker = yf.Ticker(symbol + ".NS")
 data = ticker.history(period="1d")
-
 if data.empty:
     st.warning("No live data available.")
 else:
     st.dataframe(data.tail(1))
 
-# Display candlestick chart for past 1 month
+# Candlestick chart (1 Month)
 st.subheader(f"{symbol} Candlestick Chart (1 Month)")
 hist = ticker.history(period="1mo")
-
 if not hist.empty:
     hist.reset_index(inplace=True)
     fig = go.Figure(data=[go.Candlestick(
@@ -47,4 +45,4 @@ else:
     st.info("No chart data available.")
 
 st.markdown("---")
-st.caption("📈 Developed by Prasanth | Cloud Safe AI Trader Dashboard")                 
+st.caption("📈 Developed by Prasanth | Cloud Safe AI Trader Dashboard")
