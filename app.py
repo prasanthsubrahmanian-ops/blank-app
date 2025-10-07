@@ -16,7 +16,7 @@ data = yf.download(ticker, period="6mo", interval="1d")
 
 if not data.empty:
     st.subheader(f"Showing data for: {ticker}")
-        st.dataframe(data.tail())
+    st.dataframe(data.tail())
 
             # Plot closing price
                 fig = go.Figure()
