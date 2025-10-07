@@ -20,7 +20,7 @@ if not data.empty:
 
             # Plot closing price
                 fig = go.Figure()
-                    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines', name='Close Price'))
+                fig.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines', name='Close Price'))
                         fig.update_layout(title=f"{ticker} Closing Price", xaxis_title="Date", yaxis_title="Price")
                             st.plotly_chart(fig, use_container_width=True)
 
