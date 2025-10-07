@@ -1,4 +1,4 @@
-# app.py - AI NIFTY Trade Dashboard
+# app.py - Prasanth AI Trader Dashboard
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 # Page Configuration
 # -----------------------------
 st.set_page_config(
-    page_title="AI Trade Dashboard - NIFTY",
+    page_title="Prasanth AI Trader",
     page_icon="📈",
     layout="wide"
 )
@@ -16,7 +16,7 @@ st.set_page_config(
 # -----------------------------
 # Header
 # -----------------------------
-st.title("📊 Welcome to the AI Trade Dashboard")
+st.title("📊 Welcome to Prasanth AI Trader")
 st.markdown("#### Real-time NIFTY 50 & Bank NIFTY Stocks & Derivatives Analytics 🚀")
 
 # -----------------------------
@@ -26,7 +26,7 @@ st.sidebar.header("Select Options")
 
 index_option = st.sidebar.selectbox("Select Index", ["NIFTY 50", "BANK NIFTY"])
 
-# Example NIFTY 50 stocks (you can expand later)
+# Example NIFTY 50 stocks
 nifty_symbols = [
     "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS",
     "ICICIBANK.NS", "SBIN.NS", "HINDUNILVR.NS",
