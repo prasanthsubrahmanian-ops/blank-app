@@ -1,10 +1,9 @@
 streamlit
 plotly
 pandas
-yfinance
 nsepython
-scikit-learn
 numpy
 matplotlib
 seaborn
 requests
+scikit-learn
